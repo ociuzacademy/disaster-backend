@@ -1,0 +1,131 @@
+{% extends "index.html" %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <h1 class="text-center my-4">Create Collection Center</h1>
+        <div class="container custom-form-container">
+            <form method="post" action="{% url 'create_collection_center' %}" enctype="multipart/form-data" class="mt-4 shadow p-4 bg-light rounded">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Center Name:</label>
+                    <input type="text" id="name" name="name" class="form-control" required placeholder="Enter center name">
+                </div>
+
+                <div class="mb-3">
+                    <label for="district" class="form-label">District:</label><br>
+                    <select id="district" name="district" class="form-select" required>
+                        <option value="">Select District</option>
+                        <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+                        <option value="Kollam">Kollam</option>
+                        <option value="Pathanamthitta">Pathanamthitta</option>
+                        <option value="Alappuzha">Alappuzha</option>
+                        <option value="Kottayam">Kottayam</option>
+                        <option value="Idukki">Idukki</option>
+                        <option value="Ernakulam">Ernakulam</option>
+                        <option value="Thrissur">Thrissur</option>
+                        <option value="Palakkad">Palakkad</option>
+                        <option value="Malappuram">Malappuram</option>
+                        <option value="Kozhikode">Kozhikode</option>
+                        <option value="Wayanad">Wayanad</option>
+                        <option value="Kannur">Kannur</option>
+                        <option value="Kasargod">Kasargod</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address:</label>
+                    <input type="text" id="address" name="address" class="form-control" required placeholder="Enter place name">
+                </div>
+
+                <div class="mb-3">
+                    <label for="gmap_link" class="form-label">Google Maps Link:</label>
+                    <input type="text" id="gmap_link" name="gmap_link" class="form-control" placeholder="Paste Google Maps link here" onblur="extractCoordinates()">
+                </div>
+
+                <div class="mb-3">
+                    <label for="location" class="form-label">Location (Coordinates):</label>
+                    <input type="text" id="latitude" name="latitude" class="form-control" placeholder="Latitude" readonly required>
+                    <input type="text" id="longitude" name="longitude" class="form-control mt-2" placeholder="Longitude" readonly required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="contact_person" class="form-label">Contact Person:</label>
+                    <input type="text" id="contact_person" name="contact_person" class="form-control" required placeholder="Enter contact person name">
+                </div>
+
+                <div class="mb-3">
+                    <label for="contact_phone" class="form-label">Contact Phone:</label>
+                    <input type="text" id="contact_phone" name="contact_phone" class="form-control" required placeholder="Enter contact phone">
+                </div>
+
+                <div class="mb-3">
+                    <label for="contact_email" class="form-label">Contact Email:</label>
+                    <input type="email" id="contact_email" name="contact_email" class="form-control" required placeholder="Enter contact email">
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description:</label>
+                    <textarea id="description" name="description" class="form-control" placeholder="Enter description"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="profile_pic" class="form-label">Profile Picture:</label>
+                    <input type="file" id="profile_pic" name="profile_pic" class="form-control" accept="image/*">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+    function extractCoordinates() {
+        const gmapLink = document.getElementById('gmap_link').value;
+        const latitudeInput = document.getElementById('latitude');
+        const longitudeInput = document.getElementById('longitude');
+    
+        // Regular expression to match coordinates in the format after 'data='
+        const regex = /data=.*?(\d+\.\d+).*?(\d+\.\d+)/; // Matches coordinates from 'data=' format
+    
+        const match = gmapLink.match(regex); // Try to match with the regex pattern
+    
+        if (match) {
+            const latitude = match[1];
+            const longitude = match[2];
+    
+            // Set the coordinates in the input fields
+            latitudeInput.value = latitude;
+            longitudeInput.value = longitude;
+        } else {
+            // Clear the input fields if the link is invalid
+            latitudeInput.value = '';
+            longitudeInput.value = '';
+            alert("Invalid Google Maps link. Please make sure it contains coordinates in the 'data=' format.");
+        }
+    }
+
+    // Show alert if camp creation was successful
+    {% if success %}
+        alert('Collection centre created successfully!');
+        window.location.href = "{% url 'collection_center_list' %}";  // Redirect to the camp list page
+    {% endif %}
+</script>
+</script>
+
+
+<style>
+    .custom-form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ced4da;
+        border-radius: 10px;
+        background-color: #f8f9fa;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>
+
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends "index.html" %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <h1 class="text-center my-4">News List</h1>
+
+        <div class="custom-form-container">
+            <form method="GET" action="{% url 'news_list' %}">
+                <div class="row">
+                    {% comment %} <div class="col-md-4">
+                        <label for="category">Filter by Category:</label>
+                        <div class="custom-select-container">
+                            <select class="custom-select" id="category" name="category">
+                                <option value="">All Categories</option>
+                                {% for category in categories %}
+                                    <option value="{{ category }}" {% if request.GET.category == category %}selected{% endif %}>
+                                        {{ category }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div> {% endcomment %}
+                    <div class="col-md-4">
+                        <label for="search">Search by Title:</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="search-icon" style="background-color: #28a745; color: white;">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                            </div>
+                            <input type="text" class="form-control" id="search" name="search" value="{{ request.GET.search }}" placeholder="Search news" aria-describedby="search-icon">
+                        </div>
+                    </div>
+                </div>
+                {% comment %} <div class="text-center my-3">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <a href="{% url 'news_list' %}" class="btn btn-secondary">Reset</a>
+                </div> {% endcomment %}
+            </form>
+        </div>
+
+        <table class="table table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Image</th> <!-- New column for the news image -->
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Published Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if news_items %}
+                    {% for item in news_items %}
+                        <tr>
+                            <td>
+                                {% if item.news_pic %}
+                                    <img src="{{ item.news_pic.url }}" alt="{{ item.title }}" style="max-width: 100px; max-height: 100px; border-radius: 5px;"/>
+                                {% else %}
+                                    <img alt="No Image" style="max-width: 100px; max-height: 100px; border-radius: 5px;"/> <!-- Default image if none exists -->
+                                {% endif %}
+                            </td>
+                            <td>{{ item.title }}</td>
+                            <td>{{ item.description|truncatewords:20 }}</td> <!-- Show a truncated version of the description -->
+                            <td>{{ item.created_at|date:"Y-m-d H:i" }}</td> <!-- Use created_at as published date -->
+                            <td>
+                                <a href="{% url 'update_news' item.id %}" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="{% url 'delete_news' item.id %}" onclick="return confirm('Are you sure you want to delete this news?');" class="btn btn-danger btn-sm">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">No news found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<style>
+    body {
+        background-color: #f0f4f8; /* Light background for the whole page */
+    }
+
+    .custom-form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ced4da;
+        border-radius: 10px;
+        background-color: #ffffff; /* White background for the form */
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .custom-select-container {
+        position: relative;
+    }
+
+    .custom-select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        appearance: none;
+        background: #fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="gray" d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center;
+        background-size: 15px;
+        cursor: pointer;
+    }
+
+    .custom-select:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+    }
+
+    .table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: collapse;
+        background-color: #ffffff; /* White background for the table */
+        border-radius: 10px;
+        overflow: hidden; /* Rounded corners */
+    }
+
+    .table th, .table td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+
+    .table th {
+        background-color: #f4f4f4; /* Light gray background for headers */
+    }
+
+    .table tr:hover {
+        background-color: #e9ecef; /* Light gray hover effect */
+    }
+
+    /* Optional styling for the buttons */
+    .btn {
+        margin-right: 5px;
+    }
+
+    /* Responsive image styling */
+    img {
+        border-radius: 5px; /* Rounded corners for images */
+    }
+</style>
+{% endblock %}

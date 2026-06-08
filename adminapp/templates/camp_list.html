@@ -1,0 +1,143 @@
+{% extends "index.html" %}
+
+{% block content %}
+<section class="content" style="background-color: #f0f4f8; padding: 20px;">
+    <div class="container-fluid">
+        <h1 class="text-center my-4">Camp List</h1>
+
+        <div class="custom-form-container">
+            <form method="GET" action="{% url 'camp_list' %}">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="district">Filter by District:</label>
+                        <div class="custom-select-container">
+                            <select class="form-select" id="district" name="district">
+                                <option value="">All Districts</option>
+                                {% for district in districts %}
+                                    <option value="{{ district }}" {% if request.GET.district == district %}selected{% endif %}>
+                                        {{ district }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="place">Filter by Place:</label>
+                        <div class="custom-select-container">
+                            <select class="form-select" id="place" name="place">
+                                <option value="">All Places</option>
+                                {% for place in places %}
+                                    <option value="{{ place }}" {% if request.GET.place == place %}selected{% endif %}>
+                                        {{ place }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="search">Search by Name:</label>
+                        <div class="input-group">
+                            <span class="input-group-text" id="search-icon" style="background-color: #28a745; color: white;">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="search" name="search" value="{{ request.GET.search }}" placeholder="Search camps" aria-describedby="search-icon">
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center my-3">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <a href="{% url 'camp_list' %}" class="btn btn-secondary">Reset</a>
+                </div>
+            </form>
+        </div>
+
+        <table class="table table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>District</th>
+                    <th>Address</th>
+                    <th>Contact Person</th>
+                    <th>Contact Phone</th>
+                    <th>Profile Picture</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if camps %}
+                    {% for camp in camps %}
+                        <tr>
+                            <td>{{ camp.name }}</td>
+                            <td>{{ camp.district }}</td>
+                            <td>{{ camp.address }}</td>
+                            <td>{{ camp.contact_person }}</td>
+                            <td>{{ camp.contact_phone }}</td>
+                            <td>
+                                {% if camp.profile_pic %}
+                                    <img src="{{ camp.profile_pic.url }}" alt="{{ camp.name }}" style="width: 100px; height: auto;">
+                                {% else %}
+                                    No image
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'update_camp' camp.id %}" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="{% url 'delete_camp' camp.id %}" onclick="return confirm('Are you sure you want to delete this camp?');" class="btn btn-danger btn-sm">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center">No camps found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<style>
+    .custom-form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ced4da;
+        border-radius: 10px;
+        background-color: #ffffff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-select-container {
+        position: relative;
+    }
+
+    .table {
+        background-color: #ffffff;
+    }
+
+    .table th, .table td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+
+    .table th {
+        background-color: #e9ecef;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .custom-form-container {
+            padding: 15px;
+        }
+
+        .table th, .table td {
+            padding: 10px;
+        }
+    }
+</style>
+{% endblock %}
+

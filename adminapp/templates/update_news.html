@@ -1,0 +1,55 @@
+{% extends "index.html" %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <h1 class="text-center my-4">Update News</h1>
+        <div class="container custom-form-container">
+            <form method="post" action="{% url 'update_news' news_item.pk %}" enctype="multipart/form-data" class="mt-4 shadow p-4 bg-light rounded">
+                {% csrf_token %}
+
+                <!-- Form fields for updating news -->
+                <div class="mb-3">
+                    <label for="title" class="form-label">News Title:</label>
+                    <input type="text" id="title" name="title" class="form-control" required value="{{ news_item.title }}" placeholder="Enter news title">
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description:</label>
+                    <textarea id="description" name="description" class="form-control" required placeholder="Enter news description">{{ news_item.description }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="news_pic" class="form-label">News Picture (optional):</label>
+                    <input type="file" id="news_pic" name="news_pic" class="form-control" accept="image/*">
+                    {% if news_item.news_pic %}
+                        <img src="{{ news_item.news_pic.url }}" alt="Current News Picture" class="img-fluid mt-2" style="max-width: 300px;">
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary">Update</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Show alert if news update was successful
+    {% if success %}
+        alert('News item updated successfully!');
+        window.location.href = "{% url 'news_list' %}";  // Redirect to the news list page
+    {% endif %}
+</script>
+
+<style>
+    .custom-form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ced4da;
+        border-radius: 10px;
+        background-color: #f8f9fa;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}

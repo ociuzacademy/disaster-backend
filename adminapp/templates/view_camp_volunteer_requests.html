@@ -1,0 +1,60 @@
+{% extends "index.html" %}
+
+{% block content %}
+<section class="content" style="background-color: #f0f4f8; padding: 20px;">
+    <div class="container-fluid">
+        <h1 class="text-center my-4">Camp Volunteer Requests</h1>
+
+        <table class="table table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Aadhaar</th>
+                    <th>Skills/Experience</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if volunteers %}
+                    {% for volunteer in volunteers %}
+                        <tr>
+                            <td>{{ volunteer.name }}</td>
+                            <td>{{ volunteer.address }}</td>
+                            <td>{{ volunteer.aadhaar }}</td>
+                            <td>{{ volunteer.skills_exp }}</td>
+                            <td>{{ volunteer.status }}</td>
+                            <td>
+                                <a href="{% url 'approve_reject_camp_volunteer' volunteer.id 'approve' %}" class="btn btn-success btn-sm">Approve</a>
+                                <a href="{% url 'approve_reject_camp_volunteer' volunteer.id 'reject' %}" class="btn btn-danger btn-sm">Reject</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">No volunteer requests found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<style>
+    .table {
+        background-color: #ffffff;
+    }
+    .table th, .table td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+    .table th {
+        background-color: #e9ecef;
+    }
+    .table tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+</style>
+{% endblock %}
