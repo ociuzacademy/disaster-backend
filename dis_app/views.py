@@ -5,6 +5,15 @@ from django.contrib.auth.hashers import check_password
 from django.contrib.auth import login, logout
 from rest_framework.permissions import AllowAny
 from .models import UserReg, VolunteerCamp, VolunteerCollectionCentre
+from rest_framework.permissions import AllowAny
+from .weather_service import (
+    get_weather,
+    get_current_weather,
+    get_daily_forecast,
+    calculate_risk,
+    calculate_forecast_risk,
+    calculate_overall_risk
+)
 from .serializers import (
     UserRegRegistrationSerializer,
     VolunteerCampRegistrationSerializer,
@@ -139,3 +148,195 @@ class DisNewsListView(APIView):
         news = DisNews.objects.all()
         serializer = DisNewsSerializer(news, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+#Weather
+class WeatherPredictionView(APIView):
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+
+        # -----------------------------------------
+        # GET JSON DATA
+        # -----------------------------------------
+
+        latitude = request.data.get("latitude")
+        longitude = request.data.get("longitude")
+
+        # -----------------------------------------
+        # VALIDATION
+        # -----------------------------------------
+
+        if latitude is None or longitude is None:
+
+            return Response(
+                {
+                    "status": False,
+                    "message": (
+                        "Latitude and longitude "
+                        "are required."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # -----------------------------------------
+        # CONVERT TO FLOAT
+        # -----------------------------------------
+
+        try:
+
+            latitude = float(latitude)
+            longitude = float(longitude)
+
+        except (ValueError, TypeError):
+
+            return Response(
+                {
+                    "status": False,
+                    "message": (
+                        "Latitude and longitude "
+                        "must be valid numbers."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # -----------------------------------------
+        # LATITUDE VALIDATION
+        # -----------------------------------------
+
+        if latitude < -90 or latitude > 90:
+
+            return Response(
+                {
+                    "status": False,
+                    "message": (
+                        "Latitude must be "
+                        "between -90 and 90."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # -----------------------------------------
+        # LONGITUDE VALIDATION
+        # -----------------------------------------
+
+        if longitude < -180 or longitude > 180:
+
+            return Response(
+                {
+                    "status": False,
+                    "message": (
+                        "Longitude must be "
+                        "between -180 and 180."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # -----------------------------------------
+        # FETCH WEATHER
+        # -----------------------------------------
+
+        try:
+
+            weather_data = get_weather(
+                latitude,
+                longitude
+            )
+
+            # -------------------------------------
+            # CURRENT WEATHER
+            # -------------------------------------
+
+            current_weather = get_current_weather(
+                weather_data
+            )
+
+            # -------------------------------------
+            # CURRENT RISK
+            # -------------------------------------
+
+            current_risk = calculate_risk(
+                weather_data.get(
+                    "current",
+                    {}
+                )
+            )
+
+            # -------------------------------------
+            # 7-DAY FORECAST
+            # -------------------------------------
+
+            forecast = get_daily_forecast(
+                weather_data
+            )
+
+            # -------------------------------------
+            # FORECAST RISK
+            # -------------------------------------
+
+            forecast_risk = calculate_forecast_risk(
+                forecast
+            )
+
+            # -------------------------------------
+            # OVERALL RISK
+            # -------------------------------------
+
+            overall_risk = calculate_overall_risk(
+                current_risk,
+                forecast_risk
+            )
+
+            # -------------------------------------
+            # RESPONSE
+            # -------------------------------------
+
+            return Response(
+                {
+                    "status": True,
+
+                    "message": (
+                        "Weather prediction "
+                        "fetched successfully."
+                    ),
+
+                    "location": {
+                        "latitude": latitude,
+                        "longitude": longitude,
+                        "timezone": weather_data.get(
+                            "timezone"
+                        )
+                    },
+
+                    "current": current_weather,
+
+                    "risk": {
+                        "current": current_risk,
+                        "forecast": forecast_risk,
+                        "overall": overall_risk
+                    },
+
+                    "forecast": forecast
+                },
+
+                status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+
+            return Response(
+                {
+                    "status": False,
+                    "message": (
+                        "Unable to fetch "
+                        "weather data."
+                    ),
+                    "error": str(e)
+                },
+
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

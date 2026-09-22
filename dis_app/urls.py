@@ -10,6 +10,7 @@ from .views import (
     VolunteerCampProfileView,
     VolunteerCollectionCentreProfileView,
     LoginView,
+    WeatherPredictionView
   
 )
 
@@ -31,4 +32,6 @@ urlpatterns = [
 
     path('collection-centers/', CollectionCenterListView.as_view(), name='collection-center-list'),
     path('news/', DisNewsListView.as_view(), name='disnews-list'),
+
+    path('weather/',WeatherPredictionView.as_view(),name='weather-prediction'),
 ]
