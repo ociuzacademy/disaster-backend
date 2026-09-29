@@ -72,46 +72,62 @@ class LoginView(APIView):
         password = request.data.get('password')
 
         if not email or not password:
-            return Response({"error": "Email and password are required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Email and password are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         user = None
         user_type = None
 
-        # Check UserReg model
         if UserReg.objects.filter(email=email).exists():
             user = UserReg.objects.filter(email=email).first()
-            user_type = "User"
+            user_type = "user"
 
-        # Check VolunteerCollectionCentre model
         elif VolunteerCollectionCentre.objects.filter(email=email).exists():
             user = VolunteerCollectionCentre.objects.filter(email=email).first()
-            user_type = "Volunteer Collection Centre"
+            user_type = "volcc"
 
-        # Check VolunteerCamp model
         elif VolunteerCamp.objects.filter(email=email).exists():
             user = VolunteerCamp.objects.filter(email=email).first()
-            user_type = "Volunteer Camp"
+            user_type = "volcmp"
 
-        # If no user is found
-        if not user:
-            return Response({"error": "Invalid email or password."}, status=status.HTTP_401_UNAUTHORIZED)
+        if not user or password != user.password:
+            return Response(
+                {"error": "Invalid email or password."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
-        # Validate password
-        if not check_password(password, user.password):
-            return Response({"error": "Invalid email or password."}, status=status.HTTP_401_UNAUTHORIZED)
+        request.session['user_id'] = user.id
+        request.session['user_type'] = user_type
+        request.session.save()
 
-        # Log in the user
-        login(request, user)
-        session_id = request.session.session_key
+        # Prepare fields expected by the Flutter application.
+        data = {
+            "id": user.id,
+            "status": "success",
+            "utype": user_type,
+            "login": True,
+            "cId": str(
+                getattr(user, 'cId',
+                        getattr(user, 'c_id', '')) or ''
+            ),
+            "sectionId": str(
+                getattr(user, 'sectionId',
+                        getattr(user, 'section_id', '')) or ''
+            ),
+        }
 
         return Response(
             {
+                "data": [data],
                 "message": f"Login successful as {user_type}",
-                "session_id": session_id,
+                "session_id": request.session.session_key,
             },
             status=status.HTTP_200_OK
         )
 
+    
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
